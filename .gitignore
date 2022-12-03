@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+### My Folders ###
+/src/main/resources/domitech
+/src/main/resources/narzedzia

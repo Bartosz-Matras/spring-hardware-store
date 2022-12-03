@@ -8,4 +8,5 @@ import pl.matrasbartosz.springhardwarestore.entity.ProductCategory;
 @CrossOrigin("http://localhost:4200")
 @RepositoryRestResource(collectionResourceRel = "productsCategory", path = "productsCategory")
 public interface ProductCategoryRepository extends JpaRepository<ProductCategory, Long> {
+
 }

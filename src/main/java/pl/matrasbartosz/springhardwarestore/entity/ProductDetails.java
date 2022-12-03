@@ -5,13 +5,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "product_details")
 @Getter
 @Setter
-public class ProductDetails {
+public class ProductDetails implements Serializable {
 
+    private static final long serialVersionUID = -3216332916285646541L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
