@@ -5,8 +5,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
-import pl.matrasbartosz.springhardwarestore.entity.ScrapperProductPageTwo;
+import pl.matrasbartosz.springhardwarestore.entity.ScrapperProduct;
 import pl.matrasbartosz.springhardwarestore.exception.UrlNotFoundException;
 import pl.matrasbartosz.springhardwarestore.service.ScrapperProductServiceImpl;
 
@@ -19,11 +21,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@PropertySource("classpath:scrapper.properties")
 public class WrapperDomitech {
 
-    private static final String RESOURCE_PATH = "src/main/resources/domitech/";
-    private static final String URL = "https://domitech.pl/firm-pol-1389459367-Stanley.html";
-    private static final String URL_PAGE = "https://domitech.pl/firm-pol-1389459367-Stanley.html?counter=%s";
+    @Value("${resource.path.domitech}")
+    private String RESOURCE_PATH;
+
+    @Value("${url.domitech}")
+    private String URL;
+
+    @Value("${url.pages.domitech}")
+    private String URL_PAGES;
 
     private static final String ERROR_MSG = "Cannot connect to ";
 
@@ -38,13 +46,13 @@ public class WrapperDomitech {
         int numberOfPages = getNumberOfPages();
 
         for (int i = 0; i < numberOfPages; i++) {
-            String url = String.format(URL_PAGE, i);
+            String url = String.format(URL_PAGES, i);
             saveToFile(url, " ", "urls.txt");
             scrapPage(url);
         }
     }
 
-    private static void saveToFile(String text1, String text2, String fileName) {
+    private void saveToFile(String text1, String text2, String fileName) {
         try (OutputStreamWriter writer =
                      new OutputStreamWriter(new FileOutputStream(RESOURCE_PATH + fileName, true), StandardCharsets.UTF_8)){
             writer.append(text1).append(" ").append(text2).append("\n");
@@ -91,27 +99,26 @@ public class WrapperDomitech {
 
             Set<String> modelsPrice = pageElements.stream()
                     .map(jobLink -> jobLink.attr("href"))
-                    .map(WrapperDomitech::scrapeThroughOfferPage)
+                    .map(this::scrapeThroughOfferPage)
                     .collect(Collectors.toSet());
 
             modelsPrice.forEach(s -> {
                 if(!s.isEmpty()){
                     saveToFile(s, "", "modelPrice2.txt");
                     List<String> items = Arrays.stream(s.split("\\|")).map(String::trim).toList();
+                    ScrapperProduct scrapperProduct
+                            = scrapperProductServiceImpl.getScrapperProduct(items.get(0), items.get(3));
 
-                    ScrapperProductPageTwo scrapperProductPageTwo
-                            = scrapperProductServiceImpl.getScrapperProductTwo(items.get(0));
-
-                    if(scrapperProductPageTwo == null) {
-                        ScrapperProductPageTwo newScrapperProductPageTwo
-                                = new ScrapperProductPageTwo(0L, items.get(0), new BigDecimal(items.get(1).replace(" ", "")), items.get(2), items.get(3));
-                        scrapperProductServiceImpl.saveScrapperProductTwo(newScrapperProductPageTwo);
-                    }else {
-                        scrapperProductPageTwo.setSku(items.get(0));
-                        scrapperProductPageTwo.setUnitPrice(new BigDecimal(items.get(1)));
-                        scrapperProductPageTwo.setPageUrl(items.get(2));
-                        scrapperProductPageTwo.setPageName(items.get(3));
-                        scrapperProductServiceImpl.saveScrapperProductTwo(scrapperProductPageTwo);
+                    if(scrapperProduct == null) {
+                        ScrapperProduct newScrapperProduct
+                                = new ScrapperProduct(0L, items.get(0), new BigDecimal(items.get(1).replace(" ", "")), items.get(2), items.get(3));
+                        scrapperProductServiceImpl.saveScrapperProduct(newScrapperProduct);
+                    }else if(!scrapperProduct.getUnitPrice().equals(new BigDecimal(items.get(1)))) {
+                        scrapperProduct.setSku(items.get(0));
+                        scrapperProduct.setUnitPrice(new BigDecimal(items.get(1)));
+                        scrapperProduct.setPageUrl(items.get(2));
+                        scrapperProduct.setPageName(items.get(3));
+                        scrapperProductServiceImpl.saveScrapperProduct(scrapperProduct);
                     }
                 }
             });
@@ -120,7 +127,7 @@ public class WrapperDomitech {
         }
     }
 
-    private static String scrapeThroughOfferPage(String subUrl) {
+    private String scrapeThroughOfferPage(String subUrl) {
         String data = "";
         saveToFile(subUrl, " ", "urls.txt");
 

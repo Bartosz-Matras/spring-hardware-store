@@ -9,11 +9,11 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "scrapper_product_narzedzia")
+@Table(name = "scrapper_product")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ScrapperProductPageOne {
+public class ScrapperProduct {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

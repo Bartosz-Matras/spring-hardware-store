@@ -1,17 +1,15 @@
 package pl.matrasbartosz.springhardwarestore.service;
 
 
-import pl.matrasbartosz.springhardwarestore.entity.ScrapperProductPageOne;
-import pl.matrasbartosz.springhardwarestore.entity.ScrapperProductPageTwo;
+import pl.matrasbartosz.springhardwarestore.entity.ScrapperProduct;
+
+import java.util.List;
 
 public interface ScrapperProductService {
 
-    void saveScrapperProductOne(ScrapperProductPageOne scrapperProductPageOne);
+    void saveScrapperProduct(ScrapperProduct scrapperProduct);
 
-    ScrapperProductPageOne getScrapperProductOne(String sku);
+    ScrapperProduct getScrapperProduct(String sku, String pageName);
 
-    void saveScrapperProductTwo(ScrapperProductPageTwo scrapperProductPageTwo);
-
-    ScrapperProductPageTwo getScrapperProductTwo(String sku);
-
+    List<ScrapperProduct> getScrapperProducts(String sku);
 }

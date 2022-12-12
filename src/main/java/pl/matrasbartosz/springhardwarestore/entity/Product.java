@@ -44,6 +44,9 @@ public class Product {
     @Column(name = "units_in_stock")
     private int unitsInStock;
 
+    @Column(name = "bought_number")
+    private Long boughtNumber;
+
     @Column(name = "date_created")
     @CreationTimestamp
     private Date dateCreated;

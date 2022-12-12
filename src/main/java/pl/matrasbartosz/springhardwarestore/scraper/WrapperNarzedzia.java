@@ -5,11 +5,12 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
-import pl.matrasbartosz.springhardwarestore.entity.ScrapperProductPageOne;
+import pl.matrasbartosz.springhardwarestore.entity.ScrapperProduct;
 import pl.matrasbartosz.springhardwarestore.exception.UrlNotFoundException;
 import pl.matrasbartosz.springhardwarestore.service.ScrapperProductServiceImpl;
-
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,12 +21,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@PropertySource("classpath:scrapper.properties")
 public class WrapperNarzedzia {
 
-    private static final String URL = "https://www.narzedzia.pl/%s,p76/";
-    private static final String URL_PAGES = "https://www.narzedzia.pl/%s,p76,%s/";
+    @Value("${url.narzedzia}")
+    private String URL;
 
-    private static final String RESOURCE_PATH = "src/main/resources/narzedzia/";
+    @Value("${url.pages.narzedzia}")
+    private String URL_PAGES;
+
+    @Value("${resource.path.narzedzia}")
+    private String RESOURCE_PATH;
 
     private static final String ERROR_MSG = "Cannot connect to ";
 
@@ -40,13 +46,13 @@ public class WrapperNarzedzia {
         int numberOfPages = getNumberOfPages();
 
         for (int i = 1; i <= numberOfPages; i++) {
-            String url = String.format(URL_PAGES, "stanley", i);
+            String url = String.format(URL_PAGES, i);
             saveToFile(url, " ", "urls.txt");
             scrapPage(url);
         }
     }
 
-    private static void saveToFile(String text1, String text2, String fileName) {
+    private void saveToFile(String text1, String text2, String fileName) {
         try (OutputStreamWriter writer =
                      new OutputStreamWriter(new FileOutputStream(RESOURCE_PATH + fileName, true), StandardCharsets.UTF_8)){
             writer.append(text1).append(" ").append(text2).append("\n");
@@ -56,19 +62,16 @@ public class WrapperNarzedzia {
     }
 
     private Integer getNumberOfPages(){
-        String url = String.format(URL, "stanley");
         int max;
 
         try {
-            Document parsedDocument = Jsoup.connect(url).get();
+            Document parsedDocument = Jsoup.connect(URL).get();
             Elements pageSize = parsedDocument.select(".page");
-
             max = getMax(pageSize.text().split(" ")[3]);
         }catch (IOException e){
-            saveToFile("Scrapper stopped cannot connect to " + url + "\n\n", e.getMessage(), "exception.txt");
+            saveToFile("Scrapper stopped cannot connect to " + URL + "\n\n", e.getMessage(), "exception.txt");
             max = - 1;
         }
-
         return max;
     }
 
@@ -90,26 +93,26 @@ public class WrapperNarzedzia {
 
             Set<String> modelsPrice = pageElements.stream()
                     .map(jobLink -> jobLink.attr("href"))
-                    .map(WrapperNarzedzia::scrapeThroughOfferPage)
+                    .map(this::scrapeThroughOfferPage)
                     .collect(Collectors.toSet());
 
             modelsPrice.forEach(s -> {
                 if(!s.isEmpty()){
                     saveToFile(s, "", "modelPrice2.txt");
                     List<String> items = Arrays.stream(s.split("\\|")).map(String::trim).toList();
-                    ScrapperProductPageOne scrapperProductPageOne
-                            = scrapperProductServiceImpl.getScrapperProductOne(items.get(0));
+                    ScrapperProduct scrapperProduct
+                            = scrapperProductServiceImpl.getScrapperProduct(items.get(0), items.get(3));
 
-                    if (scrapperProductPageOne == null){
-                        ScrapperProductPageOne newScrapperProductPageOne
-                                = new ScrapperProductPageOne(0L, items.get(0), new BigDecimal(items.get(1).replace(" ", "")), items.get(2), items.get(3));
-                        scrapperProductServiceImpl.saveScrapperProductOne(newScrapperProductPageOne);
-                    }else{
-                        scrapperProductPageOne.setSku(items.get(0));
-                        scrapperProductPageOne.setUnitPrice(new BigDecimal(items.get(1)));
-                        scrapperProductPageOne.setPageUrl(items.get(2));
-                        scrapperProductPageOne.setPageName(items.get(3));
-                        scrapperProductServiceImpl.saveScrapperProductOne(scrapperProductPageOne);
+                    if (scrapperProduct == null){
+                        ScrapperProduct newScrapperProduct
+                                = new ScrapperProduct(0L, items.get(0), new BigDecimal(items.get(1).replace(" ", "")), items.get(2), items.get(3));
+                        scrapperProductServiceImpl.saveScrapperProduct(newScrapperProduct);
+                    }else if(!scrapperProduct.getUnitPrice().equals(new BigDecimal(items.get(1)))){
+                        scrapperProduct.setSku(items.get(0));
+                        scrapperProduct.setUnitPrice(new BigDecimal(items.get(1)));
+                        scrapperProduct.setPageUrl(items.get(2));
+                        scrapperProduct.setPageName(items.get(3));
+                        scrapperProductServiceImpl.saveScrapperProduct(scrapperProduct);
                     }
                 }
             });
@@ -118,7 +121,7 @@ public class WrapperNarzedzia {
         }
     }
 
-    private static String scrapeThroughOfferPage(String subUrl) {
+    private String scrapeThroughOfferPage(String subUrl) {
         String data = "";
         saveToFile(subUrl, " ", "urls.txt");
 

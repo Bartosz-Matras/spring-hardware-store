@@ -6,6 +6,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+
 @Component
 @EnableAsync
 public class ScraperScheduling {
@@ -19,6 +21,11 @@ public class ScraperScheduling {
         this.wrapperDomitech = wrapperDomitech;
     }
 
+    @PostConstruct
+    public void onStartup() {
+        new Thread(wrapperNarzedzia::startWrap).start();
+        new Thread(wrapperDomitech::startWrap).start();
+    }
 
     @Async
     @Scheduled(cron = "0 0 8 * * MON")
@@ -26,8 +33,6 @@ public class ScraperScheduling {
     public void scrappPageOne() {
         wrapperNarzedzia.startWrap();
     }
-
-
 
     @Async
     @Scheduled(cron = "0 0 8 * * MON")
