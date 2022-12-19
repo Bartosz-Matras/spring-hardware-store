@@ -12,13 +12,16 @@ import java.util.Objects;
 @RequestMapping("/api")
 public class CorrelationRepository {
 
+    private final CorrelationService correlationService;
+
     @Autowired
-    private CorrelationService correlationService;
+    public CorrelationRepository(CorrelationService correlationService) {
+        this.correlationService = correlationService;
+    }
 
     @CrossOrigin("http://localhost:4200")
     @GetMapping("/discounts/update")
     public void updateProductAlsoWatched(@RequestParam("ids") List<Long> ids, @RequestParam("id") Long id) {
-        System.out.println(ids + " = " + id);
         for(Long tempId : ids){
             if(!Objects.equals(tempId, id)){
                 ProductAlsoWatched productAlsoWatched =

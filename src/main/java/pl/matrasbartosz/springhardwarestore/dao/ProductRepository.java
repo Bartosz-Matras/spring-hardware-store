@@ -14,11 +14,13 @@ import java.util.List;
 @RepositoryRestResource(collectionResourceRel = "products", path = "products")
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    Page<Product> findProductByProductSubCategoryIdIn(@Param("ids") List<Long> productIdList, Pageable pageable);
+    Page<Product> findProductByProductSubCategoryIdInAndActive(@Param("ids") List<Long> productIdList, @Param("active") Boolean active, Pageable pageable);
 
-    Page<Product> findProductByProductSubCategoryId(@Param("id") Long id, Pageable pageable);
+    Page<Product> findProductByProductSubCategoryIdAndActive(@Param("id") Long id, @Param("active") Boolean active, Pageable pageable);
 
-    Page<Product> findByNameContaining(@Param("name") String name, Pageable pageable);
+    Page<Product> findByNameContainingAndActive(@Param("name") String name, @Param("active") Boolean active, Pageable pageable);
+
+    Page<Product> findProductByActive(@Param("active") Boolean active, Pageable pageable);
 
     Product findProductById(@Param("id") Long id);
 

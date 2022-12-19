@@ -44,7 +44,6 @@ public class WrapperDomitech {
 
     public void startWrap(){
         int numberOfPages = getNumberOfPages();
-
         for (int i = 0; i < numberOfPages; i++) {
             String url = String.format(URL_PAGES, i);
             saveToFile(url, " ", "urls.txt");

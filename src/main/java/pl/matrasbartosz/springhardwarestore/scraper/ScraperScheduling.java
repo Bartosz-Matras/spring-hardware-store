@@ -29,14 +29,12 @@ public class ScraperScheduling {
 
     @Async
     @Scheduled(cron = "0 0 8 * * MON")
-//    @Scheduled(fixedDelay = 1000000)
     public void scrappPageOne() {
         wrapperNarzedzia.startWrap();
     }
 
     @Async
     @Scheduled(cron = "0 0 8 * * MON")
-//    @Scheduled(fixedDelay = 1000000)
     public void scrappPageTwo() {
         wrapperDomitech.startWrap();
     }

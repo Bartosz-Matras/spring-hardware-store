@@ -6,10 +6,7 @@ import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import pl.matrasbartosz.springhardwarestore.entity.Product;
-import pl.matrasbartosz.springhardwarestore.entity.ProductCategory;
-import pl.matrasbartosz.springhardwarestore.entity.ProductDetails;
-import pl.matrasbartosz.springhardwarestore.entity.ProductSubCategory;
+import pl.matrasbartosz.springhardwarestore.entity.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.EntityType;
@@ -42,6 +39,12 @@ public class MyConfigDataRest implements RepositoryRestConfigurer {
 
         // disable HTTP methods for ProductSubCategory: PUT, POST and DELETE
         disableHttpMethods(ProductSubCategory.class, config, theUnsupportedActions);
+
+        // disable HTTP methods for Country: PUT, POST and DELETE
+        disableHttpMethods(Country.class, config, theUnsupportedActions);
+
+        // disable HTTP methods for State: PUT, POST and DELETE
+        disableHttpMethods(State.class, config, theUnsupportedActions);
 
         exposeIds(config);
     }
