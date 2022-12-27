@@ -49,7 +49,7 @@ public class MyConfigDataRest implements RepositoryRestConfigurer {
         exposeIds(config);
     }
 
-    private void disableHttpMethods(Class theClass, RepositoryRestConfiguration configuration, HttpMethod[] theUnsupportedActions) {
+    private void disableHttpMethods(Class<?> theClass, RepositoryRestConfiguration configuration, HttpMethod[] theUnsupportedActions) {
         configuration.getExposureConfiguration()
                 .forDomainType(theClass)
                 .withItemExposure((metadata, httpMethods) -> httpMethods.disable(theUnsupportedActions))
@@ -64,15 +64,15 @@ public class MyConfigDataRest implements RepositoryRestConfigurer {
         Set<EntityType<?>> entities = entityManager.getMetamodel().getEntities();
 
         // - create an array of the entity types
-        List<Class> entityClasses = new ArrayList<>();
+        List<Class<?>> entityClasses = new ArrayList<>();
 
         // - get the entity types for the entities
-        for (EntityType tempEntityType : entities){
+        for (EntityType<?> tempEntityType : entities){
             entityClasses.add(tempEntityType.getJavaType());
         }
 
         // - expose the entity ids for the array of entity/domain types
-        Class[] domainTypes = entityClasses.toArray(new Class[0]);
+        Class<?>[] domainTypes = entityClasses.toArray(new Class[0]);
         config.exposeIdsFor(domainTypes);
     }
 }

@@ -42,7 +42,7 @@ public class WrapperDomitech {
         this.scrapperProductServiceImpl = scrapperProductServiceImpl;
     }
 
-    public void startWrap(){
+    public void startWrap() {
         int numberOfPages = getNumberOfPages();
         for (int i = 0; i < numberOfPages; i++) {
             String url = String.format(URL_PAGES, i);
@@ -53,38 +53,38 @@ public class WrapperDomitech {
 
     private void saveToFile(String text1, String text2, String fileName) {
         try (OutputStreamWriter writer =
-                     new OutputStreamWriter(new FileOutputStream(RESOURCE_PATH + fileName, true), StandardCharsets.UTF_8)){
+                     new OutputStreamWriter(new FileOutputStream(RESOURCE_PATH + fileName, true), StandardCharsets.UTF_8)) {
             writer.append(text1).append(" ").append(text2).append("\n");
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private Integer getNumberOfPages(){
+    private Integer getNumberOfPages() {
         int max;
 
-        try{
+        try {
             Document parsedDocument = Jsoup.connect(URL).get();
             Elements pageSize = parsedDocument.select(".pagination__link");
             max = getMax(pageSize.text());
-        }catch (IOException e) {
+        } catch (IOException e) {
             saveToFile("Scrapper stopped cannot connect to " + URL + "\n\n", e.getMessage(), "exception.txt");
             max = -1;
         }
         return max;
     }
 
-    private int getMax(String text){
+    private int getMax(String text) {
         List<Integer> max = new ArrayList<>();
-        for(String element : text.split(" ")){
-            try{
+        for (String element : text.split(" ")) {
+            try {
                 max.add(Integer.parseInt(element.trim()));
-            } catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
                 saveToFile("Error trying parse: " + element + " - ", e.getMessage(), "numberFormatException.txt");
             }
         }
 
-        if(max.isEmpty()){
+        if (max.isEmpty()) {
             return -1;
         }
 
@@ -92,7 +92,7 @@ public class WrapperDomitech {
     }
 
     private void scrapPage(String url) {
-        try{
+        try {
             Document parsedDocument = Jsoup.connect(url).get();
             Elements pageElements = parsedDocument.select(".product .product__icon");
 
@@ -102,17 +102,17 @@ public class WrapperDomitech {
                     .collect(Collectors.toSet());
 
             modelsPrice.forEach(s -> {
-                if(!s.isEmpty()){
+                if (!s.isEmpty()) {
                     saveToFile(s, "", "modelPrice2.txt");
                     List<String> items = Arrays.stream(s.split("\\|")).map(String::trim).toList();
                     ScrapperProduct scrapperProduct
                             = scrapperProductServiceImpl.getScrapperProduct(items.get(0), items.get(3));
 
-                    if(scrapperProduct == null) {
+                    if (scrapperProduct == null) {
                         ScrapperProduct newScrapperProduct
                                 = new ScrapperProduct(0L, items.get(0), new BigDecimal(items.get(1).replace(" ", "")), items.get(2), items.get(3));
                         scrapperProductServiceImpl.saveScrapperProduct(newScrapperProduct);
-                    }else if(!scrapperProduct.getUnitPrice().equals(new BigDecimal(items.get(1)))) {
+                    } else if (!scrapperProduct.getUnitPrice().equals(new BigDecimal(items.get(1)))) {
                         scrapperProduct.setSku(items.get(0));
                         scrapperProduct.setUnitPrice(new BigDecimal(items.get(1)));
                         scrapperProduct.setPageUrl(items.get(2));
@@ -121,7 +121,7 @@ public class WrapperDomitech {
                     }
                 }
             });
-        }catch (IOException e){
+        } catch (IOException e) {
             saveToFile("UrlNotFoundException: ", new UrlNotFoundException(url).getMessage(), "exception.txt");
         }
     }
@@ -136,18 +136,18 @@ public class WrapperDomitech {
             Element price = subParsedDocument.selectFirst(".projector_prices__price");
             Element catalogNumber = subParsedDocument.selectFirst("span.dictionary__value_txt");
 
-            if(catalogNumber != null && price != null) {
+            if (catalogNumber != null && price != null) {
                 String catalogNumberString = catalogNumber.text().trim();
                 try {
-                    double priceDouble = Double.parseDouble(price.text().replace("zł", "").replace(",", ".").replace(" ", "") .trim());
+                    double priceDouble = Double.parseDouble(price.text().replace("zł", "").replace(",", ".").replace(" ", "").trim());
                     data = catalogNumberString + " | " + priceDouble + " | " + subUrl + " | " + "Domitech.pl";
                     saveToFile(data, "", "modelPrice.txt");
-                }catch (NumberFormatException e){
+                } catch (NumberFormatException e) {
                     data = "";
                     saveToFile(data, "", "modelPrice.txt");
                 }
             }
-        }catch (IOException e) {
+        } catch (IOException e) {
             saveToFile("UrlNotFoundException: ", new UrlNotFoundException(ERROR_MSG + subUrl).getMessage(), "exception.txt");
         }
 

@@ -16,7 +16,7 @@ public class ScraperScheduling {
     private final WrapperDomitech wrapperDomitech;
 
     @Autowired
-    public ScraperScheduling(WrapperNarzedzia wrapperNarzedzia, WrapperDomitech wrapperDomitech){
+    public ScraperScheduling(WrapperNarzedzia wrapperNarzedzia, WrapperDomitech wrapperDomitech) {
         this.wrapperNarzedzia = wrapperNarzedzia;
         this.wrapperDomitech = wrapperDomitech;
     }

@@ -22,8 +22,8 @@ public class CorrelationRepository {
     @CrossOrigin("http://localhost:4200")
     @GetMapping("/discounts/update")
     public void updateProductAlsoWatched(@RequestParam("ids") List<Long> ids, @RequestParam("id") Long id) {
-        for(Long tempId : ids){
-            if(!Objects.equals(tempId, id)){
+        for (Long tempId : ids) {
+            if (!Objects.equals(tempId, id)) {
                 ProductAlsoWatched productAlsoWatched =
                         correlationService.findProductAlsoWatchedByIdFatherProductAndIdProduct(tempId, id);
                 productAlsoWatched.setWatchedCount(productAlsoWatched.getWatchedCount() + 1);
