@@ -10,12 +10,12 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/api")
-public class CorrelationRepository {
+public class CorrelationController {
 
     private final CorrelationService correlationService;
 
     @Autowired
-    public CorrelationRepository(CorrelationService correlationService) {
+    public CorrelationController(CorrelationService correlationService) {
         this.correlationService = correlationService;
     }
 
